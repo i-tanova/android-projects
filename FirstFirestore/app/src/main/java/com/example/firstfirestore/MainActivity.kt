@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    val adapter = ProductAdapter()
+    val productAdapter = ProductAdapter()
 
 
     val firebaseDB = FirebaseFirestore.getInstance()
@@ -24,7 +24,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        products_list.adapter = adapter
+        products_list.apply {
+            adapter = productAdapter
+            setHasFixedSize(true)
+        }
 
         getDataFromFirestore()
     }
@@ -55,7 +58,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun cleanData() {
-        adapter.setData(emptyList())
+        productAdapter.setData(emptyList())
     }
 
     private fun showData(querySnapshot: QuerySnapshot) {
@@ -68,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("FIREBASE", "onSuccess")
 
-        adapter.setData(productsList)
+        productAdapter.setData(productsList)
     }
 
 
