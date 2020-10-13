@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "982682295575",
+    "firebase_url": "https://foodjournal-48d08.firebaseio.com",
+    "project_id": "foodjournal-48d08",
+    "storage_bucket": "foodjournal-48d08.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982682295575:android:50b7b19a03307186b7ab52",
+        "android_client_info": {
+          "package_name": "com.example.introfirestore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "982682295575-kdjilm6bhobinqar3bc4a9f1rbhb4ib1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNGpBRcpY5NyW9xksCo3Zj_wJ5mvgnGWY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "982682295575-kdjilm6bhobinqar3bc4a9f1rbhb4ib1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
