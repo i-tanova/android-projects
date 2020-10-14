@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import java.util.*
 
 /**
  * Generic adapter with [RecyclerView.ViewHolder] to be used in [RecyclerView]
@@ -25,6 +26,10 @@ abstract class MyAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
     fun setData(data: List<T>?) {
         this.data = data
         notifyDataSetChanged()
+    }
+
+    fun getData(): List<T>?{
+        return this.data?.toList()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
