@@ -5,12 +5,18 @@ import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Filter
 import android.widget.Filterable
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.selection.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.example.firstfirestore.data.DataManager
 import com.example.firstfirestore.data.ProductUI
 import kotlinx.android.synthetic.main.content_main.*
@@ -24,6 +30,20 @@ class MainActivity : AppCompatActivity() {
     var searchView: SearchView? = null
     var originalData: List<ProductUI>? = null
 
+    var tracker: SelectionTracker<Long>? = null
+
+    class MyItemDetailsLookup(private val recyclerView: RecyclerView) :
+        ItemDetailsLookup<Long>() {
+
+        override fun getItemDetails(event: MotionEvent): ItemDetails<Long>? {
+            val view = recyclerView.findChildViewUnder(event.x, event.y)
+            if (view != null) {
+                return (recyclerView.getChildViewHolder(view) as MyViewHolder).getItemDetails()
+            }
+            return null
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -31,18 +51,50 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
+
         //val decoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
         dataManager.getDataFromFirestore {
             originalData = it
             productAdapter = ProductAdapter(dataManager, it)
-            productAdapter.setData(originalData)
+
+
 
             products_list.apply {
                 adapter = productAdapter
                 setHasFixedSize(true)
                 // addItemDecoration(decoration)
             }
+
+
+            tracker = SelectionTracker.Builder(
+                "mySelection",
+                products_list,
+                ProductAdapter.MyItemKeyProvider(productAdapter),
+                MyItemDetailsLookup(products_list),
+                StorageStrategy.createLongStorage()
+            ).withSelectionPredicate(
+                SelectionPredicates.createSelectAnything()
+            ).build()
+
+            productAdapter.tracker = tracker
+
+            tracker?.addObserver(
+                object : SelectionTracker.SelectionObserver<Long>() {
+                    override fun onSelectionChanged() {
+                        super.onSelectionChanged()
+//                        val items = selectionTracker?.selection!!.size()
+//                        deleteContainer.isVisible = items > 0
+//                        deleteTv.text = "Delete $items ${vm.type}"
+                    }
+                })
+
+            productAdapter.setData(originalData)
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        tracker?.onSaveInstanceState(outState)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -100,17 +152,37 @@ class MainActivity : AppCompatActivity() {
 
 class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>) : MyAdapter<ProductUI>(), Filterable {
 
-    override fun bind(t: ProductUI, holder: MyViewHolder?) {
+    // This is needed for Recycle View - multiple selection
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun bind(t: ProductUI, holder: MyViewHolder?, isSelected: Boolean) {
         val productTxtV = holder?.itemView?.findViewById<TextView>(R.id.product_lbl)
         productTxtV?.text = t.name
 
         val productCalsTxtV = holder?.itemView?.findViewById<TextView>(R.id.calories_lbl)
         productCalsTxtV?.text = t.calories.toString()
+
+        val isSelectedIcon = holder?.itemView?.findViewById<ImageView>(R.id.product_selected)
+        isSelectedIcon?.visibility = if(isSelected) View.VISIBLE else View.GONE
+    }
+
+    class DiffCallback : DiffUtil.ItemCallback<ProductUI>() {
+        override fun areItemsTheSame(oldItem: ProductUI, newItem: ProductUI): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: ProductUI, newItem: ProductUI): Boolean {
+            return oldItem.name == newItem.name
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
         return R.layout.product_list_item
     }
+
+    override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getFilter(): Filter {
         val filter = object : Filter() {
@@ -145,6 +217,15 @@ class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>
             }
         }
         return filter
+    }
+
+    class MyItemKeyProvider(private val adapter: ProductAdapter) : ItemKeyProvider<Long>(SCOPE_CACHED)
+    {
+        override fun getKey(position: Int): Long? =
+            adapter.getData()?.get(position)?.id
+
+        override fun getPosition(key: Long): Int =
+            adapter.getData()?.indexOfFirst {it.id == key} ?: -1
     }
 
 }

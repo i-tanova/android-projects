@@ -24,7 +24,7 @@ class DataManager{
         for (query in querySnapshot) {
             val product: ProductResource? = query.toObject(ProductResource::class.java)
             product?.let {
-                productsList.add(ProductUI(product.name, product.calories))
+                productsList.add(ProductUI(product.id, product.name, product.calories))
             }
         }
         Log.d("FIREBASE", "onSuccess")

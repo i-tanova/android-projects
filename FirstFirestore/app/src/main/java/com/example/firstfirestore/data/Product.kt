@@ -1,5 +1,11 @@
 package com.example.firstfirestore.data
 
-data class ProductResource(var name: String = "", var calories: Int = 0)
+import com.example.firstfirestore.MyAdapterItem
 
-data class ProductUI(val name: String, val calories: Int)
+data class ProductResource(var id: Long = 0L, var name: String = "", var calories: Int = 0)
+
+class ProductUI(val id: Long?, val name: String, val calories: Int) : MyAdapterItem {
+    override fun getId(): Long {
+        return id ?: 0
+    }
+}
