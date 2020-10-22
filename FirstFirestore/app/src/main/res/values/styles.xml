@@ -1,9 +1,18 @@
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
+        <!-- your app branding color for the app bar -->
+        <!-- However, if you’re using a Toolbar (along with a Theme.AppCompat.NoActionBar theme, most likely),
+         you’ll need to manually set the background color.
+          android:background="?attr/colorPrimary"
+
+          the ?attr/ format is how you tell Android that this value should be resolved
+           from your theme rather than directly from a resource.
+          -->
         <item name="colorPrimary">@color/colorPrimary</item>
+        <!-- darker variant for the status bar and contextual app bars. Lollipop and above-->
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!-- theme UI controls like checkboxes and text fields -->
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
