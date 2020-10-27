@@ -1,16 +1,16 @@
 package com.example.firstfirestore.data
 
 import android.util.Log
+import com.example.firstfirestore.FirstApplication
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import java.util.concurrent.Flow
 
-class DataManager{
+class DataManager {
 
     private val firebaseDB = FirebaseFirestore.getInstance()
     private val collectionRef = firebaseDB.collection("Products")
 
-    public fun getDataFromFirestore(result: (ArrayList<ProductUI>) -> Unit){
+    public fun getDataFromFirestore(result: (ArrayList<ProductUI>) -> Unit) {
         collectionRef.get().addOnSuccessListener { querySnapshot ->
             result(getData(querySnapshot))
         }.addOnFailureListener {
@@ -29,5 +29,10 @@ class DataManager{
         }
         Log.d("FIREBASE", "onSuccess")
         return productsList
+    }
+
+    fun storeItems(productUI: List<ProductUI>) {
+        FirstApplication.instance?.db?.productDao()
+            ?.insertAll(productUI.map { ProductDB(it.getId(), it.name, it.calories) })
     }
 }

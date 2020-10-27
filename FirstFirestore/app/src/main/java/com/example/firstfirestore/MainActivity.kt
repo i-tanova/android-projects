@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.firstfirestore.data.DataManager
 import com.example.firstfirestore.data.ProductUI
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
 
@@ -26,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
 
     val dataManager = DataManager()
-    lateinit var  productAdapter: ProductAdapter
+    lateinit var productAdapter: ProductAdapter
     var searchView: SearchView? = null
     var originalData: List<ProductUI>? = null
 
@@ -50,14 +52,24 @@ class MainActivity : AppCompatActivity() {
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
-
-
         //val decoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        setupList()
+
+        add_button.setOnClickListener { view ->
+            val selectedUIItems = arrayListOf<ProductUI>()
+            val selectedItems = tracker?.selection
+            selectedItems?.forEach {itemId ->
+                val item = productAdapter.originalData.find { it.id == itemId }
+                item?.let { selectedUIItems.add(item)  }
+            }
+            dataManager.storeItems(selectedUIItems)
+        }
+    }
+
+    private fun setupList() {
         dataManager.getDataFromFirestore {
             originalData = it
             productAdapter = ProductAdapter(dataManager, it)
-
-
 
             products_list.apply {
                 adapter = productAdapter
@@ -82,9 +94,14 @@ class MainActivity : AppCompatActivity() {
                 object : SelectionTracker.SelectionObserver<Long>() {
                     override fun onSelectionChanged() {
                         super.onSelectionChanged()
-//                        val items = selectionTracker?.selection!!.size()
-//                        deleteContainer.isVisible = items > 0
-//                        deleteTv.text = "Delete $items ${vm.type}"
+                        val selectedItems = tracker?.selection
+                        if (selectedItems?.size() ?: 0 > 0) {
+                            supportActionBar?.title = "Selected  ${selectedItems?.size()}"
+                            add_button.visibility = View.VISIBLE
+                        } else {
+                            supportActionBar?.title = getString(R.string.app_name)
+                            add_button.visibility = View.GONE
+                        }
                     }
                 })
 
@@ -150,7 +167,8 @@ class MainActivity : AppCompatActivity() {
 }
 
 
-class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>) : MyAdapter<ProductUI>(), Filterable {
+class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>) :
+    MyAdapter<ProductUI>(), Filterable {
 
     // This is needed for Recycle View - multiple selection
     init {
@@ -165,7 +183,7 @@ class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>
         productCalsTxtV?.text = t.calories.toString()
 
         val isSelectedIcon = holder?.itemView?.findViewById<ImageView>(R.id.product_selected)
-        isSelectedIcon?.visibility = if(isSelected) View.VISIBLE else View.GONE
+        isSelectedIcon?.visibility = if (isSelected) View.VISIBLE else View.GONE
     }
 
     class DiffCallback : DiffUtil.ItemCallback<ProductUI>() {
@@ -191,7 +209,6 @@ class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>
                 val filterResults = FilterResults()
                 if (charString.isBlank()) {
                     filterResults.values = originalData
-                    //manager.getDataFromFirestore { filterResults.values = it }
                 } else {
                     val filteredList: MutableList<ProductUI> = ArrayList()
                     for (row in originalData) {
@@ -219,13 +236,13 @@ class ProductAdapter(val manager: DataManager, val originalData: List<ProductUI>
         return filter
     }
 
-    class MyItemKeyProvider(private val adapter: ProductAdapter) : ItemKeyProvider<Long>(SCOPE_CACHED)
-    {
+    class MyItemKeyProvider(private val adapter: ProductAdapter) :
+        ItemKeyProvider<Long>(SCOPE_CACHED) {
         override fun getKey(position: Int): Long? =
             adapter.getData()?.get(position)?.id
 
         override fun getPosition(key: Long): Int =
-            adapter.getData()?.indexOfFirst {it.id == key} ?: -1
+            adapter.getData()?.indexOfFirst { it.id == key } ?: -1
     }
 
 }
