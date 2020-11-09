@@ -31,8 +31,14 @@ class DataManager {
         return productsList
     }
 
-    fun storeItems(productUI: List<ProductUI>) {
+    suspend fun storeItems(productUI: List<ProductUI>) {
         FirstApplication.instance?.db?.productDao()
             ?.insertAll(productUI.map { ProductDB(it.getId(), it.name, it.calories) })
+        Log.d("DB", "storeItems")
+    }
+
+    suspend fun getItems(): List<ProductUI>? {
+        return FirstApplication.instance?.db?.productDao()
+            ?.getAll()?.map { ProductUI(it.id, it.name, it.calories) }
     }
 }

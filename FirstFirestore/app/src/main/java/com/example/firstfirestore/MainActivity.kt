@@ -22,6 +22,9 @@ import com.example.firstfirestore.data.ProductUI
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var productAdapter: ProductAdapter
     var searchView: SearchView? = null
     var originalData: List<ProductUI>? = null
+    val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 
     var tracker: SelectionTracker<Long>? = null
 
@@ -62,7 +66,9 @@ class MainActivity : AppCompatActivity() {
                 val item = productAdapter.originalData.find { it.id == itemId }
                 item?.let { selectedUIItems.add(item)  }
             }
-            dataManager.storeItems(selectedUIItems)
+            coroutineScope.launch {
+                dataManager.storeItems(selectedUIItems)
+            }
         }
     }
 
