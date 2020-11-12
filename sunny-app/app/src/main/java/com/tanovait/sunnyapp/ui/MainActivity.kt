@@ -13,10 +13,7 @@ import com.tanovait.sunnyapp.api.APIInterface
 import com.tanovait.sunnyapp.data.Weather
 import com.tanovait.sunnyapp.data.WeatherUI
 import kotlinx.android.synthetic.main.activity_main2.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
@@ -46,18 +43,21 @@ class MainActivity2 : AppCompatActivity() {
         city_text.text = "Sofia"
         weather_forecast_rv.adapter = adapter
 
+        coroutineScope.launch(Dispatchers.IO){
+            val weatherResponse = api?.getWeather("Sofia", "metric")
+            withContext(Dispatchers.Main) {
+                val (description, image) = getWeatherImageAndDescription(weatherResponse!!.weather)
+                today_image.setImageDrawable(getDrawable(imageToDrawble(image)))
+                today_description.text = description
+                today_temperature.text = "${weatherResponse!!.main.temp} C"
+            }
+        }
 
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                val weatherResponse = api?.getWeather("Sofia", "metric")
                 val forecastResponse = api?.getForecast("Sofia", "metric")
 
                 withContext(Dispatchers.Main) {
-                    val (description, image) = getWeatherImageAndDescription(weatherResponse!!.weather)
-                    today_image.setImageDrawable(getDrawable(imageToDrawble(image)))
-                    today_description.text = description
-                    today_temperature.text = "${weatherResponse!!.main.temp} C"
-
                     val weatherList = mutableListOf<WeatherUI>()
                     val dateMapList = mutableListOf<DateWeatherMap>()
                     val dayGroup = forecastResponse!!.list.groupBy { it.dt_txt.split(Pattern.compile("\\s+"))[0] }
