@@ -10,6 +10,7 @@ import com.example.firstfirestore.MyViewHolder
 import com.tanovait.sunnyapp.R
 import com.tanovait.sunnyapp.api.APIClient
 import com.tanovait.sunnyapp.api.APIInterface
+import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.Weather
 import com.tanovait.sunnyapp.data.WeatherUI
 import kotlinx.android.synthetic.main.activity_main2.*
@@ -18,6 +19,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
+// Images are taken from :https://pixabay.com/vectors/clouds-sunny-warm-patches-weather-37009/
 class MainActivity2 : AppCompatActivity() {
     val coroutineScope = CoroutineScope(Dispatchers.Main)
     val api = APIClient.client?.create(APIInterface::class.java)
@@ -43,7 +45,7 @@ class MainActivity2 : AppCompatActivity() {
         city_text.text = "Sofia"
         weather_forecast_rv.adapter = adapter
 
-        coroutineScope.launch(Dispatchers.IO){
+        coroutineScope.launch(Dispatchers.IO) {
             val weatherResponse = api?.getWeather("Sofia", "metric")
             withContext(Dispatchers.Main) {
                 val (description, image) = getWeatherImageAndDescription(weatherResponse!!.weather)
@@ -55,7 +57,8 @@ class MainActivity2 : AppCompatActivity() {
 
         coroutineScope.launch(Dispatchers.IO) {
             try {
-                val forecastResponse = api?.getForecast("Sofia", "metric")
+                val forecastResponse = withTimeout<ForecastResponse?>(15000)
+                { retry<ForecastResponse?>(3, ::getForecast) }
 
                 withContext(Dispatchers.Main) {
                     val weatherList = mutableListOf<WeatherUI>()
@@ -76,6 +79,23 @@ class MainActivity2 : AppCompatActivity() {
                 Log.e("TAG", e.localizedMessage, e)
             }
         }
+    }
+
+    private suspend fun getForecast() = api?.getForecast("Sofia", "metric")
+
+    suspend fun <T> retry(numOfRetries: Int, block: suspend () -> T): T {
+        var delayMs = 1000L
+        repeat(numOfRetries) {
+            try {
+                return block()
+            } catch (e: java.lang.Exception) {
+                Log.e("TAG", e.localizedMessage, e)
+            }
+            delay(delayMs)
+            delayMs *= 2
+        }
+
+        return block()
     }
 
     enum class IMAGE {
