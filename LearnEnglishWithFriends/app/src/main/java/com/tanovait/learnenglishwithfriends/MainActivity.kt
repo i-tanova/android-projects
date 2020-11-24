@@ -11,10 +11,13 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 import com.tanovait.learnenglishwithfriends.data.DataManager
 import com.tanovait.learnenglishwithfriends.data.VideoUI
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-    val db = DataManager()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
     val adapter = object: MyAdapter<VideoUI>(){
 
         override fun bind(t: VideoUI, holder: MyViewHolder?) {
@@ -36,9 +39,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         recyclerView.adapter = adapter
-
-        db.getDataFromFirestore {
-            adapter.setData(it)
+        val db = DataManager(this)
+        coroutineScope.launch {
+            db.getDataFromFirestore {
+                adapter.setData(it)
+            }
         }
     }
 }

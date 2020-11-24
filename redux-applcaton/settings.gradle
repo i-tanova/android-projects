@@ -1,2 +1,0 @@
-include ':app', ':external'
-project(':app').projectDir = new File('app')

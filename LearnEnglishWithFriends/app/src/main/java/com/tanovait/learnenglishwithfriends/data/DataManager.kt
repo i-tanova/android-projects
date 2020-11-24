@@ -1,20 +1,37 @@
 package com.tanovait.learnenglishwithfriends.data
 
+import android.content.Context
 import android.util.Log
+import androidx.room.Room
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class DataManager {
+class DataManager(val context: Context) {
 
     private val firebaseDB = FirebaseFirestore.getInstance()
     private val collectionRef = firebaseDB.collection("video_urls")
+    private val db = Room.databaseBuilder(context.applicationContext, VideoDatabase::class.java, "videos.db").build()
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    public fun getDataFromFirestore(result: (ArrayList<VideoUI>) -> Unit) {
-        collectionRef.get().addOnSuccessListener { querySnapshot ->
-            result(getData(querySnapshot))
-        }.addOnFailureListener {
-            Log.d("FIREBASE", "onFailure ${it.toString()}")
-            result(emptyList<VideoUI>() as ArrayList<VideoUI>)
+    suspend fun getDataFromFirestore(result: (List<VideoUI>) -> Unit){
+        val items = getItems()
+        if(items.isNullOrEmpty()){
+            collectionRef.get().addOnSuccessListener { querySnapshot ->
+                val videos = getData(querySnapshot)
+                coroutineScope.launch {
+                    storeItems(videos)
+                }
+                result(videos)
+            }.addOnFailureListener {
+                Log.d("FB", "onFailure ${it.toString()}")
+                result(emptyList<VideoUI>() as ArrayList<VideoUI>)
+            }
+        }else{
+            Log.d("DB", "SUCCESS")
+            result(items)
         }
     }
 
@@ -22,22 +39,21 @@ class DataManager {
         val productsList = ArrayList<VideoUI>()
         for (query in querySnapshot) {
             val product  = query.toObject(VideoUI::class.java)
-            product?.let {
+            product.let {
                 productsList.add(it)
             }
         }
-        Log.d("FIREBASE", "onSuccess")
+        Log.d("FB", "onSuccess")
         return productsList
     }
 
-//    suspend fun storeItems(productUI: List<ProductUI>) {
-//        FirstApplication.instance?.db?.productDao()
-//            ?.insertAll(productUI.map { ProductDB(it.getId(), it.name, it.calories) })
-//        Log.d("DB", "storeItems")
-//    }
-//
-//    suspend fun getItems(): List<ProductUI>? {
-//        return FirstApplication.instance?.db?.productDao()
-//            ?.getAll()?.map { ProductUI(it.id, it.name, it.calories) }
-//    }
+    suspend fun storeItems(videoUI: List<VideoUI>) {
+        Log.d("DB", "storeItems")
+       db.videoDao().insertAll(videoUI.mapToDB())
+    }
+
+    suspend fun getItems(): List<VideoUI>? {
+        Log.d("DB", "getItems")
+        return db.videoDao().loadAll().mapToUI()
+    }
 }
