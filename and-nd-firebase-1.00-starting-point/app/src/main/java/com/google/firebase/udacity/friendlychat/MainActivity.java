@@ -37,7 +37,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -158,11 +160,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                if(user != null){
+                if (user != null) {
                     // user is signed in
                     onSignIn(user);
                     Toast.makeText(MainActivity.this, "Welcome", Toast.LENGTH_LONG).show();
-                }else{
+                } else {
                     //signed out
                     onSignOut();
                 }
@@ -186,23 +188,31 @@ public class MainActivity extends AppCompatActivity {
         ///
         ////  Listen for child events here
         ///
-        if(childEventListener != null){
+        if (childEventListener != null) {
             return;
         }
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                  FriendlyMessage friendlyMessage = snapshot.getValue(FriendlyMessage.class);
-                  mMessageAdapter.add(friendlyMessage);
+                FriendlyMessage friendlyMessage = snapshot.getValue(FriendlyMessage.class);
+                mMessageAdapter.add(friendlyMessage);
             }
+
             @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) { }
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
+
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) { }
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+            }
+
             @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) { }
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
+
             @Override
-            public void onCancelled(@NonNull DatabaseError error) { }
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
         };
         messagesDatabaseReference.addChildEventListener(childEventListener);
     }
@@ -211,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         ///
         ////  Stop  Listen for child events here
         ///
-        if(childEventListener != null) {
+        if (childEventListener != null) {
             messagesDatabaseReference.removeEventListener(childEventListener);
             childEventListener = null;
         }
@@ -236,15 +246,8 @@ public class MainActivity extends AppCompatActivity {
                         .setIsSmartLockEnabled(false) // automatic log in
                         .setAvailableProviders(Arrays.asList(
                                 new AuthUI.IdpConfig.GoogleBuilder().build(),
-//                                new AuthUI.IdpConfig.FacebookBuilder().build(),
-//                                new AuthUI.IdpConfig.TwitterBuilder().build(),
-//                                new AuthUI.IdpConfig.MicrosoftBuilder().build(),
-//                                new AuthUI.IdpConfig.YahooBuilder().build(),
-//                                new AuthUI.IdpConfig.AppleBuilder().build(),
                                 new AuthUI.IdpConfig.EmailBuilder().build()
-                            //    new AuthUI.IdpConfig.PhoneBuilder().build(),
-                           //     new AuthUI.IdpConfig.AnonymousBuilder().build()))
-                                ))
+                        ))
                         .build(),
                 RC_SIGN_IN);
     }
@@ -258,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if(firebaseAuthStateListener != null) {
+        if (firebaseAuthStateListener != null) {
             firebaseAuth.removeAuthStateListener(firebaseAuthStateListener);
         }
         stopListenForDBChanges();
@@ -274,8 +277,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.sign_out_menu:{
+        switch (item.getItemId()) {
+            case R.id.sign_out_menu: {
                 AuthUI.getInstance().signOut(this);
                 return true;
             }
@@ -288,27 +291,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN){
+        if (requestCode == RC_SIGN_IN) {
             // Login flow
-            if(resultCode  == RESULT_OK){
+            if (resultCode == RESULT_OK) {
                 //User signed in
-            }else{
+            } else {
                 //Signed in cancel
                 finish();
             }
-        }else if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK){
+        } else if (requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK) {
             Uri selectedImgUri = data.getData();
             //Get reference to store file at chat_photos/[filename]
-            StorageReference photoRef = storageReference.child(selectedImgUri.getLastPathSegment());
+            final StorageReference photoRef = storageReference.child(selectedImgUri.getLastPathSegment());
             //Upload photo to Firebase Storage
             UploadTask task = photoRef.putFile(selectedImgUri);
 
-            task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            Task<Uri> urlTask = task.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Uri uploadedPhotoUri = taskSnapshot.getUploadSessionUri();
-                    FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, uploadedPhotoUri.toString());
-                    messagesDatabaseReference.push().setValue(friendlyMessage);
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return photoRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    // GET Download url for Glide later
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, downloadUri.toString());
+                        messagesDatabaseReference.push().setValue(friendlyMessage);
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
                 }
             });
         }
