@@ -16,6 +16,7 @@
 package com.google.firebase.udacity.friendlychat;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -36,6 +37,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -43,6 +45,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEFAULT_MSG_LENGTH_LIMIT = 1000;
     // Choose an arbitrary request code value
     private static final int RC_SIGN_IN = 123;
+    private static final int RC_PHOTO_PICKER = 234;
 
     private ListView mMessageListView;
     private MessageAdapter mMessageAdapter;
@@ -71,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
     private ChildEventListener childEventListener;
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener firebaseAuthStateListener;
+    private FirebaseStorage firebaseStorage;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
         firebaseDatabase = firebaseDatabase.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         messagesDatabaseReference = firebaseDatabase.getReference().child("messages");
+        firebaseStorage = FirebaseStorage.getInstance();
+        storageReference = firebaseStorage.getReference().child("chat_photos");
 
         // Initialize references to views
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -158,6 +168,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+
+        // ImagePickerButton shows an image picker to upload a image for a message
+        mPhotoPickerButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), RC_PHOTO_PICKER);
+            }
+        });
     }
 
     private void listenForDBChanges() {
@@ -274,6 +296,21 @@ public class MainActivity extends AppCompatActivity {
                 //Signed in cancel
                 finish();
             }
+        }else if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK){
+            Uri selectedImgUri = data.getData();
+            //Get reference to store file at chat_photos/[filename]
+            StorageReference photoRef = storageReference.child(selectedImgUri.getLastPathSegment());
+            //Upload photo to Firebase Storage
+            UploadTask task = photoRef.putFile(selectedImgUri);
+
+            task.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Uri uploadedPhotoUri = taskSnapshot.getUploadSessionUri();
+                    FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, uploadedPhotoUri.toString());
+                    messagesDatabaseReference.push().setValue(friendlyMessage);
+                }
+            });
         }
     }
 }
