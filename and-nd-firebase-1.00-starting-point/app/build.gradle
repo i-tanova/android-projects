@@ -62,6 +62,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
     // Firebase Cloud Storage
     implementation 'com.google.firebase:firebase-storage:19.2.0'
+    // Firebase Notifications
+    implementation 'com.google.firebase:firebase-messaging:21.0.0'
 
     // Displaying images
     implementation 'com.github.bumptech.glide:glide:4.11.0'

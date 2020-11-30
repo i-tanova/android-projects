@@ -305,8 +305,10 @@ public class MainActivity extends AppCompatActivity {
             final StorageReference photoRef = storageReference.child(selectedImgUri.getLastPathSegment());
             //Upload photo to Firebase Storage
             UploadTask task = photoRef.putFile(selectedImgUri);
-
-            Task<Uri> urlTask = task.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+            ///////
+            ////   // GET Download url for Glide later
+            ////
+           task.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
                 public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                     if (!task.isSuccessful()) {
