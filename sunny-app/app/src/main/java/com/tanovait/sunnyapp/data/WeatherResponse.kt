@@ -28,12 +28,10 @@ data class Main(
 )
 
 data class Wind(
-
         @SerializedName("speed") val speed: Double
 )
 
 data class Clouds(
-
         @SerializedName("all") val all: Int
 )
 
@@ -53,7 +51,6 @@ data class Weather(
 )
 
 data class Sys(
-
         @SerializedName("type") val type: Int,
         @SerializedName("id") val id: Int,
         @SerializedName("message") val message: Double,

@@ -1,5 +1,7 @@
 package com.tanovait.sunnyapp.api;
 
+import com.tanovait.sunnyapp.BuildConfig;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -11,7 +13,7 @@ public class HeaderInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request()
                 .newBuilder()
-                .addHeader("x-rapidapi-key", "insert Rapid api key here")
+                .addHeader("x-rapidapi-key", BuildConfig.APP_KEY)
                 .addHeader("x-rapidapi-host", "community-open-weather-map.p.rapidapi.com")
                 .build();
         Response response = chain.proceed(request);

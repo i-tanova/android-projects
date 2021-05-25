@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.example.firstfirestore.MyAdapter
 import com.example.firstfirestore.MyViewHolder
 import com.tanovait.sunnyapp.R
@@ -21,6 +22,8 @@ import java.util.regex.Pattern
 
 // Images are taken from :https://pixabay.com/vectors/clouds-sunny-warm-patches-weather-37009/
 class MainActivity2 : AppCompatActivity() {
+
+    private lateinit var viewModel: WeatherViewModel
     val coroutineScope = CoroutineScope(Dispatchers.Main)
     val api = APIClient.client?.create(APIInterface::class.java)
     val adapter = object : MyAdapter<WeatherUI>() {
@@ -42,6 +45,8 @@ class MainActivity2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
+        Log.i("GameFragment", "Called ViewModelProvider.get")
+        viewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
         city_text.text = "Sofia"
         weather_forecast_rv.adapter = adapter
 
