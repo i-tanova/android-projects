@@ -13,6 +13,7 @@ import com.tanovait.sunnyapp.api.APIClient
 import com.tanovait.sunnyapp.api.APIInterface
 import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.Weather
+import com.tanovait.sunnyapp.data.WeatherResponse
 import com.tanovait.sunnyapp.data.WeatherUI
 import kotlinx.android.synthetic.main.activity_main2.*
 import kotlinx.coroutines.*
@@ -24,8 +25,6 @@ import java.util.regex.Pattern
 class MainActivity2 : AppCompatActivity() {
 
     private lateinit var viewModel: WeatherViewModel
-    val coroutineScope = CoroutineScope(Dispatchers.Main)
-    val api = APIClient.client?.create(APIInterface::class.java)
     val adapter = object : MyAdapter<WeatherUI>() {
 
         override fun bind(t: WeatherUI, holder: MyViewHolder?) {
@@ -45,66 +44,48 @@ class MainActivity2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
-        Log.i("GameFragment", "Called ViewModelProvider.get")
+
         viewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
+
         city_text.text = "Sofia"
         weather_forecast_rv.adapter = adapter
 
-        coroutineScope.launch(Dispatchers.IO) {
-            val weatherResponse = api?.getWeather("Sofia", "metric")
-            withContext(Dispatchers.Main) {
-                val (description, image) = getWeatherImageAndDescription(weatherResponse!!.weather)
-                today_image.setImageDrawable(getDrawable(imageToDrawble(image)))
-                today_description.text = description
-                today_temperature.text = "${weatherResponse!!.main.temp} C"
-            }
-        }
+        viewModel.weatherLiveData.observe(this, {
+            weatherResponse(it)
+        })
 
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                val forecastResponse = withTimeout<ForecastResponse?>(15000)
-                { retry<ForecastResponse?>(3, ::getForecast) }
+        viewModel.forecastLiveData.observe(this, {
+            forecastResponse(it)
+        })
 
-                withContext(Dispatchers.Main) {
-                    val weatherList = mutableListOf<WeatherUI>()
-                    val dateMapList = mutableListOf<DateWeatherMap>()
-                    val dayGroup = forecastResponse!!.list.groupBy { it.dt_txt.split(Pattern.compile("\\s+"))[0] }
-                    for ((k, v) in dayGroup) {
-                        dateMapList.add(DateWeatherMap(Date(v[0].dt * 1000), v.flatMap { it.weather }))
-                    }
-
-                    val format = SimpleDateFormat("dd.MM EEEE")
-                    dateMapList.forEach {
-                        val weatherUI = WeatherUI(format.format(it.date), getWeatherImageAndDescription(it.list).second)
-                        weatherList.add(weatherUI)
-                    }
-                    adapter.setData(weatherList)
-                }
-            } catch (e: Exception) {
-                Log.e("TAG", e.localizedMessage, e)
-            }
-        }
+        viewModel.fetch()
     }
 
-    private suspend fun getForecast() = api?.getForecast("Sofia", "metric")
-
-    suspend fun <T> retry(numOfRetries: Int, block: suspend () -> T): T {
-        var delayMs = 1000L
-        repeat(numOfRetries) {
-            try {
-                return block()
-            } catch (e: java.lang.Exception) {
-                Log.e("TAG", e.localizedMessage, e)
-            }
-            delay(delayMs)
-            delayMs *= 2
-        }
-
-        return block()
+    private fun weatherResponse(it: WeatherResponse?) {
+        val (description, image) = getWeatherImageAndDescription(it!!.weather)
+        today_image.setImageDrawable(getDrawable(imageToDrawble(image)))
+        today_description.text = description
+        today_temperature.text = "${it!!.main.temp} C"
     }
 
     enum class IMAGE {
         RAIN, SNOW, SUN, CLOUDS
+    }
+
+    private fun forecastResponse(forecastResponse: ForecastResponse?){
+        val weatherList = mutableListOf<WeatherUI>()
+        val dateMapList = mutableListOf<MainActivity2.DateWeatherMap>()
+        val dayGroup = forecastResponse!!.list.groupBy { it.dt_txt.split(Pattern.compile("\\s+"))[0] }
+        for ((k, v) in dayGroup) {
+            dateMapList.add(MainActivity2.DateWeatherMap(Date(v[0].dt * 1000), v.flatMap { it.weather }))
+        }
+
+        val format = SimpleDateFormat("dd.MM EEEE")
+        dateMapList.forEach {
+            val weatherUI = WeatherUI(format.format(it.date), getWeatherImageAndDescription(it.list).second)
+            weatherList.add(weatherUI)
+        }
+        adapter.setData(weatherList)
     }
 
     //https://openweathermap.org/weather-conditions
