@@ -3,8 +3,6 @@ package com.example.firstfirestore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.selection.ItemDetailsLookup
-import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 
@@ -22,6 +20,12 @@ abstract class MyAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
         fun onItemClick(item: T)
     }
 
+    private val internalOnClickListener = object : OnItemClickListener<T> {
+        override fun onItemClick(item: T) {
+            onItemClickListener?.onItemClick(item)
+        }
+    }
+
     fun setOnItemClickListener(onItemClickListener: OnItemClickListener<T>?) {
         this.onItemClickListener = onItemClickListener
     }
@@ -31,22 +35,21 @@ abstract class MyAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
         notifyDataSetChanged()
     }
 
-    fun getData(): List<T>?{
+    fun getData(): List<T>? {
         return this.data?.toList()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val v = LayoutInflater.from(parent.context)
-            .inflate(viewType, parent, false) as View
+                .inflate(viewType, parent, false) as View
         return MyViewHolder(v)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (onItemClickListener != null) {
-            holder.itemView.setOnClickListener { v: View? ->
-                    data!![position]
-            }
+        holder.itemView.setOnClickListener { v: View? ->
+            internalOnClickListener.onItemClick(data!![position])
         }
+
         bind(
                 data!![position],
                 holder as MyViewHolder

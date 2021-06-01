@@ -1,5 +1,6 @@
 package com.tanovait.sunnyapp.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -9,22 +10,22 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.firstfirestore.MyAdapter
 import com.example.firstfirestore.MyViewHolder
 import com.tanovait.sunnyapp.R
-import com.tanovait.sunnyapp.api.APIClient
-import com.tanovait.sunnyapp.api.APIInterface
 import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.Weather
 import com.tanovait.sunnyapp.data.WeatherResponse
 import com.tanovait.sunnyapp.data.WeatherUI
 import kotlinx.android.synthetic.main.activity_main2.*
-import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
 
 // Images are taken from :https://pixabay.com/vectors/clouds-sunny-warm-patches-weather-37009/
+const val EXTRA_DATE: String = "date"
 class MainActivity2 : AppCompatActivity() {
+    private val tag = "MainActivity2"
 
     private lateinit var viewModel: WeatherViewModel
+
     val adapter = object : MyAdapter<WeatherUI>() {
 
         override fun bind(t: WeatherUI, holder: MyViewHolder?) {
@@ -50,6 +51,16 @@ class MainActivity2 : AppCompatActivity() {
         city_text.text = "Sofia"
         weather_forecast_rv.adapter = adapter
 
+        adapter.setOnItemClickListener(object: MyAdapter.OnItemClickListener<WeatherUI>{
+            override fun onItemClick(item: WeatherUI) {
+                Log.d(tag, "Day " + item.daytime)
+                val intent = Intent(this@MainActivity2, DetailActivity::class.java).apply {
+                    putExtra(EXTRA_DATE, item.daytime)
+                }
+                startActivity(intent)
+            }
+        })
+
         viewModel.weatherLiveData.observe(this, {
             weatherResponse(it)
         })
@@ -57,8 +68,6 @@ class MainActivity2 : AppCompatActivity() {
         viewModel.forecastLiveData.observe(this, {
             forecastResponse(it)
         })
-
-        viewModel.fetch()
     }
 
     private fun weatherResponse(it: WeatherResponse?) {
@@ -82,7 +91,7 @@ class MainActivity2 : AppCompatActivity() {
 
         val format = SimpleDateFormat("dd.MM EEEE")
         dateMapList.forEach {
-            val weatherUI = WeatherUI(format.format(it.date), getWeatherImageAndDescription(it.list).second)
+            val weatherUI = WeatherUI(it.date.time, format.format(it.date), getWeatherImageAndDescription(it.list).second)
             weatherList.add(weatherUI)
         }
         adapter.setData(weatherList)

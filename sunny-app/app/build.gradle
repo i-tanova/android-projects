@@ -16,6 +16,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String","APP_KEY", API_KEY)
+        buildConfigField("String","HOURLY_APP_KEY", HOURLY_API_KEY)
     }
 
     buildTypes {
