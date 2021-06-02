@@ -10,7 +10,6 @@ internal object APIClient {
 
     val BASE_URL = "https://community-open-weather-map.p.rapidapi.com"
     val urlHourly = "http://api.openweathermap.org"
-    ///data/2.5/forecast?q=Sofia&appid=a9f07b3e58aa83b04d6299075004c1ce
 
     val comunityClient: Retrofit?
         get() {
