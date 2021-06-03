@@ -37,7 +37,7 @@ data class Coord1 (
 
 
 data class List1 (
-        @SerializedName("dt") val dt : Int,
+        @SerializedName("dt") val dt : Long,
         @SerializedName("main") val main : Main1,
         @SerializedName("weather") val weather : List<Weather1>,
         @SerializedName("clouds") val clouds : Clouds1,

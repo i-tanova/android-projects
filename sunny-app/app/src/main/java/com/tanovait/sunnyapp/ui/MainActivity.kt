@@ -13,7 +13,6 @@ import com.tanovait.sunnyapp.R
 import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.Weather
 import com.tanovait.sunnyapp.data.WeatherResponse
-import com.tanovait.sunnyapp.data.WeatherUI
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -54,9 +53,10 @@ class MainActivity2 : AppCompatActivity() {
         adapter.setOnItemClickListener(object: MyAdapter.OnItemClickListener<WeatherUI>{
             override fun onItemClick(item: WeatherUI) {
                 Log.d(tag, "Day " + item.daytime)
-                val intent = Intent(this@MainActivity2, DetailActivity::class.java).apply {
-                    putExtra(EXTRA_DATE, item.daytime)
+                val intent = Intent(this@MainActivity2, DetailActivity::class.java).apply{
+                    this.putExtra(EXTRA_DATE, item.daytime.toString())
                 }
+
                 startActivity(intent)
             }
         })
@@ -75,10 +75,6 @@ class MainActivity2 : AppCompatActivity() {
         today_image.setImageDrawable(getDrawable(imageToDrawble(image)))
         today_description.text = description
         today_temperature.text = "${it!!.main.temp} C"
-    }
-
-    enum class IMAGE {
-        RAIN, SNOW, SUN, CLOUDS
     }
 
     private fun forecastResponse(forecastResponse: ForecastResponse?){

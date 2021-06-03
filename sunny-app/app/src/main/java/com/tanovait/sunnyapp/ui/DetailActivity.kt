@@ -18,7 +18,7 @@ class DetailActivity : AppCompatActivity() {
         dateTime.text = daytime.toString()
 
         viewModel = ViewModelProvider(this).get(WeatherDetailViewModel::class.java)
-        viewModel.fetch()
+        viewModel.fetch(daytime!!)
 
         viewModel.forecastLiveData.observe(this, {
             dateTime.text = it.toString()
