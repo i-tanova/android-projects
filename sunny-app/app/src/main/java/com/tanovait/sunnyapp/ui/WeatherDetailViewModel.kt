@@ -20,10 +20,8 @@ class WeatherDetailViewModel : ViewModel() {
     val tag = "WeatherDetailViewModel"
 
     val openWeatherApi = APIClient.openMapClient?.create(OpenWeatherAPIInterface::class.java)
-
     val forecastLiveData = MutableLiveData<WeatherListUI>()
-
-    // Day - 1622764800000
+    val format = SimpleDateFormat("dd.MM EEEE hh:mm:ss")
 
     fun fetch(dayTime: String) {
         Log.d(tag, "fetch()")
@@ -31,25 +29,40 @@ class WeatherDetailViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
 
             val hourlyForecastResponse = openWeatherApi?.getHourlyForecast("Sofia", "metric", BuildConfig.HOURLY_APP_KEY)
+//            hourlyForecastResponse?.list?.forEach {
+//                val d = Date(it.dt * 1000)
+//                Log.d(tag, "Result: ${format.format(d)}")
+//            }
+//
+//            Log.d(tag, "Filter by: " + format.format(Date(dayTime.toLong())))
+//
+//            val result = hourlyForecastResponse?.list?.filter { filterDT(it, dayTime) }
+//            result?.forEach {
+//                val d = Date(it.dt * 1000)
+//                Log.d(tag, "Filter: ${format.format(d)}")
+//            }
 
-            val d  = Date(hourlyForecastResponse?.list!!.get(0).dt * 1000)
+            val d = Date(hourlyForecastResponse?.list!!.get(0).dt * 1000)
             val format = SimpleDateFormat("dd.MM EEEE")
             Log.d(tag, format.format(d))
 
             val result = hourlyForecastResponse?.list?.filter { filterDT(it, dayTime) }
 
             val weatherUIList = result?.map { WeatherUI(it.dt.toLong(), it.dt_txt, com.tanovait.sunnyapp.ui.IMAGE.CLOUDS) }
-            weatherUIList?.let {
+            weatherUIList.let {
                 forecastLiveData.postValue(WeatherListUI(false, weatherUIList))
             }
-                    ?: forecastLiveData.postValue(WeatherListUI(isLoading = false, error = OneTimeEvent(Failure.CustomFailure())))
         }
     }
 
-    private fun filterDT(it: List1, dayTime: String): Boolean{
-        Log.d(tag, it.dt.toString())
-        Log.d(tag, dayTime)
-        return (it.dt * 1000).toString() == dayTime
+    private fun filterDT(it: List1, dayTime: String): Boolean {
+        val format = SimpleDateFormat("dd.MM")
+        val value1 = format.format(Date(it.dt * 1000))
+        val value2 = format.format(Date(dayTime.toLong()))
+        Log.d(tag, "Compare")
+        Log.d(tag, value1)
+        Log.d(tag, value2)
+        return  value1 == value2
     }
 
 }
