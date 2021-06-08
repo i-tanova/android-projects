@@ -1,4 +1,4 @@
-package com.tanovait.sunnyapp.ui
+package com.tanovait.sunnyapp.ui.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,6 +13,9 @@ import com.tanovait.sunnyapp.R
 import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.Weather
 import com.tanovait.sunnyapp.data.WeatherResponse
+import com.tanovait.sunnyapp.ui.IMAGE
+import com.tanovait.sunnyapp.ui.WeatherUI
+import com.tanovait.sunnyapp.ui.detail.DetailActivity
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -87,7 +90,8 @@ class MainActivity2 : AppCompatActivity() {
 
         val format = SimpleDateFormat("dd.MM EEEE")
         dateMapList.forEach {
-            val weatherUI = WeatherUI(it.date.time, format.format(it.date), getWeatherImageAndDescription(it.list).second)
+            val weather =  getWeatherImageAndDescription(it.list)
+            val weatherUI = WeatherUI(it.date.time, format.format(it.date), weather.first, weather.second)
             weatherList.add(weatherUI)
         }
         adapter.setData(weatherList)
