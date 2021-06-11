@@ -1,0 +1,97 @@
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- When customising this layout, retain the types of the data variables defined here (the
+         names are local to this file and can be changed to anything). Content can then be bound to
+         a custom view hierarchy using data variables of these types in exactly the same way it is
+         bound to Views in this default layout. -->
+    <data>
+        <variable
+            name="searchPanelViewModel"
+            type="com.example.tomtom.SearchPanelViewModel" />
+
+<!--        <variable-->
+<!--            name="onQueryTextListener"-->
+<!--            type="androidx.appcompat.widget.SearchView.OnQueryTextListener" />-->
+
+<!--        <variable-->
+<!--            name="onQueryFocusListener"-->
+<!--            type="android.view.View.OnFocusChangeListener" />-->
+
+<!--        <variable-->
+<!--            name="searchResultRecyclerAdapter"-->
+<!--            type="com.tomtom.navkit2.searchpanel.SearchResultRecyclerAdapter" />-->
+
+<!--        <variable-->
+<!--            name="showMoreClickListener"-->
+<!--            type="android.view.View.OnClickListener" />-->
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mainPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="40dp">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="0dp"
+            android:layout_height="88dp"
+            android:layout_marginHorizontal="40dp"
+            android:layout_marginBottom="20dp"
+            app:layout="@layout/search_view"
+            android:tooltipText="@{searchPanelViewModel.text}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/barrier"
+            />
+<!--            app:onQueryTextChange="@{onQueryTextListener}"-->
+<!--            app:onQueryTextFocusChange="@{onQueryFocusListener}" />-->
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@id/barrier"
+            app:barrierDirection="top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="informationPanelContainer, searchResultList" />
+
+        <Space
+            android:id="@+id/midView"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barrier"
+            app:layout_constraintVertical_bias="0" />
+
+        <FrameLayout
+            android:id="@+id/informationPanelContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constrainedHeight="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barrier" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResultList"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:requiresFadingEdge="vertical"
+            android:fadingEdgeLength="40dp"
+            android:overScrollMode="always"
+            app:layout_constrainedHeight="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrier"
+            app:layout_constraintBottom_toBottomOf="parent" />
+<!--        adapter="@{searchResultRecyclerAdapter}"-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
