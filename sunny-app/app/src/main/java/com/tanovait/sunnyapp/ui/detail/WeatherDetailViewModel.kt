@@ -3,6 +3,7 @@ package com.tanovait.sunnyapp.ui.detail
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.tanovait.sunnyapp.BuildConfig
 import com.tanovait.sunnyapp.api.APIClient
@@ -13,16 +14,18 @@ import com.tanovait.sunnyapp.data.Weather1
 import com.tanovait.sunnyapp.ui.IMAGE
 import com.tanovait.sunnyapp.ui.WeatherListUI
 import com.tanovait.sunnyapp.ui.WeatherUI
+import com.tanovait.sunnyapp.ui.main.WeatherRepository
+import com.tanovait.sunnyapp.ui.main.WeatherViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class WeatherDetailViewModel : ViewModel() {
+class WeatherDetailViewModel(val repository: DetailsRepository) : ViewModel() {
     val tag = "WeatherDetailViewModel"
 
-    val openWeatherApi = APIClient.openMapClient?.create(OpenWeatherAPIInterface::class.java)
+
     val forecastLiveData = MutableLiveData<WeatherListUI>()
 
     fun fetch(dayTime: String) {
@@ -30,8 +33,7 @@ class WeatherDetailViewModel : ViewModel() {
         forecastLiveData.postValue(WeatherListUI(isLoading = true))
         viewModelScope.launch(Dispatchers.IO) {
 
-            val hourlyForecastResponse =
-                openWeatherApi?.getHourlyForecast("Sofia", "metric", BuildConfig.HOURLY_APP_KEY)
+            val hourlyForecastResponse = repository.getHourlyForecast("Amsterdam", "imperial")
 
             val d = Date(hourlyForecastResponse?.list!!.get(0).dt * 1000)
             val format = SimpleDateFormat("dd.MM EEEE")
@@ -83,4 +85,13 @@ class WeatherDetailViewModel : ViewModel() {
         return imageR
     }
 
+}
+
+class DetailViewModelFactory(private val repository: DetailsRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(WeatherDetailViewModel::class.java)) {
+            return WeatherDetailViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

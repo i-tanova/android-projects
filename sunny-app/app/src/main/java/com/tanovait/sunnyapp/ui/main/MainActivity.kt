@@ -27,6 +27,7 @@ class MainActivity2 : AppCompatActivity() {
     private val tag = "MainActivity2"
 
     private lateinit var viewModel: WeatherViewModel
+    private lateinit var viewModelFactory: WeatherViewModelFactory
 
     val adapter = object : MyAdapter<WeatherUI>() {
 
@@ -48,7 +49,11 @@ class MainActivity2 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
 
-        viewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
+        viewModelFactory = WeatherViewModelFactory(WeatherRepository(WeatherDataSourceImpl()))
+        // keep this for historical view how to create ViewModel without arguments
+       /// viewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory)
+            .get(WeatherViewModel::class.java)
 
         city_text.text = "Sofia"
         weather_forecast_rv.adapter = adapter

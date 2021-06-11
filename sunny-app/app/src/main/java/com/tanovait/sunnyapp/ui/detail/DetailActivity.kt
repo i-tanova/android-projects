@@ -11,11 +11,13 @@ import com.tanovait.sunnyapp.R
 import com.tanovait.sunnyapp.ui.IMAGE
 import com.tanovait.sunnyapp.ui.WeatherUI
 import com.tanovait.sunnyapp.ui.main.EXTRA_DATE
+import com.tanovait.sunnyapp.ui.main.WeatherViewModel
 import kotlinx.android.synthetic.main.activity_detail.*
 
 class DetailActivity : AppCompatActivity() {
 
     private lateinit var viewModel: WeatherDetailViewModel
+    private lateinit var viewModelFactory: DetailViewModelFactory
 
     val adapter = object : MyAdapter<WeatherUI>() {
 
@@ -37,9 +39,12 @@ class DetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_detail)
 
         weather_forecast_rv.adapter = adapter
-
         val daytime = intent.getStringExtra(EXTRA_DATE)
-        viewModel = ViewModelProvider(this).get(WeatherDetailViewModel::class.java)
+        viewModelFactory = DetailViewModelFactory(DetailsRepository(DetailsDataSourceImpl()))
+        //viewModel = ViewModelProvider(this).get(WeatherDetailViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory)
+            .get(WeatherDetailViewModel::class.java)
+        //TODO fetch every time, see how to reuse
         viewModel.fetch(daytime!!)
 
         viewModel.forecastLiveData.observe(this, {

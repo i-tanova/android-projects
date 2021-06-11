@@ -3,6 +3,7 @@ package com.tanovait.sunnyapp.ui.main
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.tanovait.sunnyapp.api.APIClient
 import com.tanovait.sunnyapp.api.CommunityAPIInterface
@@ -10,11 +11,10 @@ import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.WeatherResponse
 import kotlinx.coroutines.*
 
-class WeatherViewModel : ViewModel() {
+class WeatherViewModel(val repository: WeatherRepository) : ViewModel() {
 
     val tag = "WeatherViewModel"
 
-    val communityApi = APIClient.comunityClient?.create(CommunityAPIInterface::class.java)
     val weatherLiveData = MutableLiveData<WeatherResponse>()
     val forecastLiveData = MutableLiveData<ForecastResponse>()
 
@@ -25,7 +25,7 @@ class WeatherViewModel : ViewModel() {
 
     private fun fetch() {
         viewModelScope.launch(Dispatchers.IO) {
-            val weatherResponse = communityApi?.getWeather("Sofia", "metric")
+            val weatherResponse = repository.getWeather("Amsterdam", "imperial")
             weatherLiveData.postValue(weatherResponse)
         }
 
@@ -39,6 +39,8 @@ class WeatherViewModel : ViewModel() {
             }
         }
     }
+
+    private suspend fun getForecast() = repository.getForecast()
 
     suspend fun <T> retry(numOfRetries: Int, block: suspend () -> T): T {
         var delayMs = 1000L
@@ -55,10 +57,19 @@ class WeatherViewModel : ViewModel() {
         return block()
     }
 
-    private suspend fun getForecast() = communityApi?.getForecast("Sofia", "metric")
 
     override fun onCleared() {
         super.onCleared()
         Log.i(tag, "WeatherViewModel destroyed!")
+    }
+}
+
+
+class WeatherViewModelFactory(private val repository: WeatherRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(WeatherViewModel::class.java)) {
+            return WeatherViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
