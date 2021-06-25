@@ -1,16 +1,14 @@
 package com.tanovait.sunnyapp.ui.main
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.tanovait.sunnyapp.R
 import com.tanovait.sunnyapp.ui.WeatherUI
-import com.tanovait.sunnyapp.ui.detail.DetailActivity
-import java.util.*
+import com.tanovait.sunnyapp.ui.detail.DetailFragment
 
 // Images are taken from :https://pixabay.com/vectors/clouds-sunny-warm-patches-weather-37009/
 const val EXTRA_DATE: String = "date"
+
 class MainActivity2 : AppCompatActivity() {
     private val tag = "MainActivity2"
 
@@ -28,11 +26,22 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
-     fun show(item: WeatherUI){
-        Log.d(tag, "Day " + item.daytime)
-        val intent = Intent(this@MainActivity2, DetailActivity::class.java).apply{
-            this.putExtra(EXTRA_DATE, item.daytime.toString())
+    fun show(item: WeatherUI) {
+        val fragment = DetailFragment()
+        val args = Bundle().apply {
+            this.putString(EXTRA_DATE, item.daytime.toString())
         }
-        startActivity(intent)
+        fragment.arguments = args
+        supportFragmentManager.beginTransaction()
+            .addToBackStack(DetailFragment.TAG)
+            .replace(R.id.main_content, fragment, DetailFragment.TAG)
+            .commit()
+
+        //Before using activity
+//        Log.d(tag, "Day " + item.daytime)
+//        val intent = Intent(this@MainActivity2, DetailActivity::class.java).apply{
+//            this.putExtra(EXTRA_DATE, item.daytime.toString())
+//        }
+//        startActivity(intent)
     }
 }
