@@ -26,10 +26,10 @@ class WeatherDataSourceImpl : WeatherDataSource {
     val communityApi = APIClient.comunityClient?.create(CommunityAPIInterface::class.java)
 
     override suspend fun getWeather(city: String, metrics: String): WeatherResponse? {
-        return communityApi?.getWeather("Sofia", "metric")
+        return communityApi?.getWeather("Amsterdam", "metric")
     }
 
     override suspend fun getForecast(): ForecastResponse? {
-        return communityApi?.getForecast("Sofia", "metric")
+        return communityApi?.getForecast("Amsterdam", "metric")
     }
 }
