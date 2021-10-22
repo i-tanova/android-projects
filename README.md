@@ -15,3 +15,7 @@
 ## Sunny app
  
  * Simple weather app that takes the info from RapidApi - Open wheater map
+
+## TrackMyTine
+
+* Display list of projects. Allows you to add project and track time spend on it. Has timer and uses shared prefs to store data.
