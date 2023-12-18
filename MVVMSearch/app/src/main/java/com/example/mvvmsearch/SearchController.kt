@@ -1,41 +1,43 @@
 package com.example.mvvmsearch
 
+import com.example.mvvmsearch.ui.SearchResult
+
 class SearchController {
 
-    fun search(query: String): List<Result>{
+    fun querySearch(query: String): List<SearchResult>{
         // Perform the search operation here and update searchResults LiveData
         // with the search results
         // You can simulate the search operation by adding dummy data
         val results = listOf(
-            Result("Result 1", "Description 1"),
-            Result("Result 2", "Description 2"),
-            Result("Result 3", "Description 3")
+            SearchResult("Query 1", "Description 1"),
+            SearchResult("Query 2", "Description 2"),
+            SearchResult("Query 3", "Description 3")
         )
        return results
     }
 
-    fun categorySearch(): List<Result>{
+    fun categorySearch(): List<SearchResult>{
         // Perform the search operation here and update searchResults LiveData
         // with the search results
         // You can simulate the search operation by adding dummy data
         val results = listOf(
-            Result("Category 1", "Description 1"),
-            Result("Category 2", "Description 2"),
-            Result("Category 3", "Description 3")
+            SearchResult("Category 1", "Description 1"),
+            SearchResult("Category 2", "Description 2"),
+            SearchResult("Category 3", "Description 3")
         )
         return results
     }
 
 
 
-    fun searchInVisibleMap(): List<Result>{
+    fun searchInVisibleMap(): List<SearchResult>{
         // Perform the search operation here and update searchResults LiveData
         // with the search results
         // You can simulate the search operation by adding dummy data
         val results = listOf(
-            Result("Map 1", "Description 1"),
-            Result("Map 2", "Description 2"),
-            Result("Map 3", "Description 3")
+            SearchResult("Map 1", "Description 1"),
+            SearchResult("Map 2", "Description 2"),
+            SearchResult("Map 3", "Description 3")
         )
         return results
     }

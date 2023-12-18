@@ -1,4 +1,4 @@
-package com.example.mvvmsearch
+package com.example.mvvmsearch.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mvvmsearch.databinding.ItemResultBinding
 
 class ResultAdapter : RecyclerView.Adapter<ResultAdapter.ResultViewHolder>() {
-    private var results: List<Result> = emptyList()
+    private var results: List<SearchResult> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -24,7 +24,7 @@ class ResultAdapter : RecyclerView.Adapter<ResultAdapter.ResultViewHolder>() {
         return results.size
     }
 
-    fun setResults(results: List<Result>) {
+    fun setResults(results: List<SearchResult>) {
         this.results = results
         notifyDataSetChanged()
     }
@@ -33,4 +33,4 @@ class ResultAdapter : RecyclerView.Adapter<ResultAdapter.ResultViewHolder>() {
         :RecyclerView.ViewHolder(binding.root)
 }
 
-data class Result(val title: String, val description: String)
+data class SearchResult(val title: String, val description: String)
