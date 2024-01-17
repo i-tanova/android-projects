@@ -82,7 +82,8 @@ class CategorySearch(
 
 class VisibleMapSearch(
     val searchInVisibleMapAreaFlow: MutableStateFlow<String?>,
-    viewController: ISearchViewModel, val searchController: SearchController
+    viewController: ISearchViewModel,
+    val searchController: SearchController
 ) : SearchState(viewController) {
     override fun onEnter() {
         viewController.reinitialize()
@@ -98,3 +99,4 @@ class VisibleMapSearch(
         searchInVisibleMapAreaFlow.value = ""
     }
 }
+

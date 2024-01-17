@@ -42,8 +42,6 @@ class MainActivity : AppCompatActivity() {
             searchViewModel.onEvent(SearchCategory("Category"))
         }
 
-        // Observe the searchResults LiveData and update the adapter when the
-        // results change
         searchViewModel.searchResults.observe(this, Observer { results ->
             adapter.setResults(results)
         })
@@ -62,10 +60,8 @@ class MainActivity : AppCompatActivity() {
     private fun updateUI(it: SearchViewState) {
         binding.backButton.visibility = if (it.isBackButtonVisible) View.VISIBLE else View.GONE
         binding.searchInVisibleMapArea.text = it.searchInVisibleMapText
-//        if (it.queryText is QueryTextUpdate.Update && !binding.searchView.text.toString()
-//                .equals(it.queryText)
-//        ) {
-//            binding.searchView.setText(it.queryText.text)
-//        }
+        if(it.queryText is QueryTextUpdate.Update){
+        binding.searchView.setText(it.queryText.text)
+        }
     }
 }

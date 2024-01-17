@@ -19,9 +19,7 @@ class SearchViewModel : ViewModel(), ISearchViewModel {
     // move in constructor
 
     val searchResults = MutableLiveData<List<SearchResult>>()
-
     private val updateQueryText = MutableStateFlow<String>("")
-
 
     fun onEvent(event: SearchUIEvents) {
         when (event) {
@@ -31,22 +29,23 @@ class SearchViewModel : ViewModel(), ISearchViewModel {
                 updateQueryText.value = event.query
                 when (searchStateHandler.state) {
                     is QuerySearch -> {
-                    //    onStateChanged(QuerySearch(updateQueryText, this, searchController))
-                        if (updateQueryText.value.isNotEmpty()) {
-                            searchResults.postValue(searchController.querySearch(updateQueryText.value))
-                        } else {
-                            reinitialize()
-                        }
+                        searchStateHandler.state.onRepeat()
                     }
-                    is Init2 -> onStateChanged(QuerySearch(updateQueryText, this, searchController))
-                    is VisibleMapSearch -> onStateChanged(QuerySearch(updateQueryText, this, searchController))
-                    is CategorySearch -> onStateChanged(QuerySearch(updateQueryText, this, searchController))
+                    is Init2,
+                    is VisibleMapSearch,
+                    is CategorySearch -> onStateChanged(
+                        QuerySearch(
+                            updateQueryText,
+                            this,
+                            searchController
+                        )
+                    )
                 }
             }
             SearchInVisibleMapArea -> {
                 onStateChanged(VisibleMapSearch(searchInVisibleMapAreaFlow, this, searchController))
             }
-            is SearchButtonPressed ->  searchStateHandler.state.onRepeat()
+            is SearchButtonPressed -> searchStateHandler.state.onRepeat()
             is SearchCategory -> onStateChanged(
                 CategorySearch(
                     event.categoryName,
@@ -69,6 +68,8 @@ class SearchViewModel : ViewModel(), ISearchViewModel {
         searchResults.postValue(emptyList())
     }
 
+    // TODO get rid of this and use ViewState insead
+    // Maybe view state should come from SearchState, not event reducer
     override fun postSearchResults(searchResult: List<SearchResult>) {
         searchResults.postValue(searchResult)
     }
