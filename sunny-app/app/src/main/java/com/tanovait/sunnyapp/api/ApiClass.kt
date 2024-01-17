@@ -8,21 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 internal object APIClient {
 
-    val BASE_URL = "https://community-open-weather-map.p.rapidapi.com"
-    val urlHourly = "http://api.openweathermap.org"
-
-    val comunityClient: Retrofit?
-        get() {
-            val interceptor = HttpLoggingInterceptor()
-            interceptor.level = HttpLoggingInterceptor.Level.BODY
-            val client = OkHttpClient.Builder().addInterceptor(interceptor).addInterceptor(ComunityHeaderInterceptor()).build()
-            val retrofit = Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(client)
-                    .build()
-            return retrofit
-        }
+    val BASE_URL = "http://api.openweathermap.org"
 
     val openMapClient: Retrofit?
         get() {
@@ -30,7 +16,7 @@ internal object APIClient {
             interceptor.level = HttpLoggingInterceptor.Level.BODY
             val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
             val retrofit = Retrofit.Builder()
-                    .baseUrl(urlHourly)
+                    .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(client)
                     .build()

@@ -5,8 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.tanovait.sunnyapp.api.APIClient
-import com.tanovait.sunnyapp.api.CommunityAPIInterface
 import com.tanovait.sunnyapp.data.ForecastResponse
 import com.tanovait.sunnyapp.data.WeatherResponse
 import kotlinx.coroutines.*

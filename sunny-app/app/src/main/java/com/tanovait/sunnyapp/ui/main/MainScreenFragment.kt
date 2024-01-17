@@ -74,18 +74,18 @@ class MainScreenFragment: Fragment() {
             }
         })
 
-        viewModel.weatherLiveData.observe(this, {
+        viewModel.weatherLiveData.observe(viewLifecycleOwner) {
             weatherResponse(it)
-        })
+        }
 
-        viewModel.forecastLiveData.observe(this, {
+        viewModel.forecastLiveData.observe(viewLifecycleOwner) {
             forecastResponse(it)
-        })
+        }
     }
 
     private fun weatherResponse(it: WeatherResponse?) {
         val (description, image) = getWeatherImageAndDescription(it!!.weather)
-        today_image.setImageDrawable(getDrawable(context!!, imageToDrawble(image)))
+        today_image.setImageDrawable(getDrawable(requireContext(), imageToDrawble(image)))
         today_description.text = description
         today_temperature.text = "${it!!.main.temp} C"
     }
