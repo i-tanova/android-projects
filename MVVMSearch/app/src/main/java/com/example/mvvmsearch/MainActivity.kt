@@ -24,50 +24,45 @@ class MainActivity : AppCompatActivity() {
 
         searchViewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
         adapter = ResultAdapter()
-
-        // Set up RecyclerView with the adapter
         binding.recyclerView.adapter = adapter
 
-        // Set up the search button click listener
+
         binding.searchButton.setOnClickListener {
-            val query = binding.searchView.text.toString()
-            searchViewModel.search(query)
+            searchViewModel.onEvent(SearchButtonPressed)
         }
 
         binding.backButton.setOnClickListener {
-            searchViewModel.onBackButtonPressed()
+            searchViewModel.onEvent(BackButtonPressed)
         }
 
         binding.searchView.doOnTextChanged { text, start, before, count ->
-            searchViewModel.onSearchQueryChanged(text.toString())
+            searchViewModel.onEvent(SearchQueryChanged(text.toString()))
         }
 
         binding.categorySearch.setOnClickListener {
-            searchViewModel.categorySearch()
+            searchViewModel.onEvent(SearchCategory("Category"))
         }
 
-        // Observe the searchResults LiveData and update the adapter when the
-        // results change
         searchViewModel.searchResults.observe(this, Observer { results ->
             adapter.setResults(results)
         })
 
-        searchViewModel.updateQueryText.observe(this) {
-            binding.searchView.setText(it ?: "")
-        }
-
-        searchViewModel.backButtonVisibility.observe(this){
-            binding.backButton.visibility = if(it == true) View.VISIBLE else View.GONE
-        }
-
         lifecycleScope.launchWhenStarted {
-            searchViewModel.searchInVisibleMapAreaFlow.collect{
-                binding.searchInVisibleMapArea.text = it
+            searchViewModel.searchViewState.collect {
+                updateUI(it)
             }
         }
 
-        binding.searchInVisibleMapAreaButton.setOnClickListener{
-            searchViewModel.visibleMapSearch()
+        binding.searchInVisibleMapAreaButton.setOnClickListener {
+            searchViewModel.onEvent(SearchInVisibleMapArea)
+        }
+    }
+
+    private fun updateUI(it: SearchViewState) {
+        binding.backButton.visibility = if (it.isBackButtonVisible) View.VISIBLE else View.GONE
+        binding.searchInVisibleMapArea.text = it.searchInVisibleMapText
+        if(it.queryText is QueryTextUpdate.Update){
+            binding.searchView.setText(it.queryText.text)
         }
     }
 }

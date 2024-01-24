@@ -76,4 +76,8 @@ class SearchViewModel: ViewModel() {
         searchInVisibleMapAreaFlow.value = "Searching...."
         searchResults.postValue(searchController.searchInVisibleMap())
     }
+
+    fun onEvent(event: SearchUIEvents) {
+
+    }
 }
