@@ -2,7 +2,7 @@ package com.example.mvvmsearch
 
 sealed class SearchUIEvents
     // Initial value
-   object Init: SearchUIEvents()
+   object InitUIEvent: SearchUIEvents()
    object BackButtonPressed : SearchUIEvents()
    class SearchQueryChanged(val query: String): SearchUIEvents()
    object SearchInVisibleMapArea: SearchUIEvents()
