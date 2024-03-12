@@ -1,4 +1,4 @@
-package com.tanovait.mvpsearch
+package com.tanovait.mvpsearch.original
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -13,11 +13,11 @@ import androidx.lifecycle.lifecycleScope
 import com.tanovait.mvpsearch.adapter.ResultAdapter
 import com.tanovait.mvpsearch.databinding.FragmentSearchBinding
 
-class SearchFragment : Fragment() {
+class SearchFragment2 : Fragment() {
 
     private lateinit var binding: FragmentSearchBinding
 
-    private lateinit var viewModel: SearchViewModel
+    private lateinit var viewModel: SearchViewModel2
     private lateinit var adapter: ResultAdapter
 
     override fun onCreateView(
@@ -59,7 +59,7 @@ class SearchFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(SearchViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(SearchViewModel2::class.java)
         viewModel.searchResults.observe(viewLifecycleOwner, Observer { results ->
             adapter.setResults(results)
         })
@@ -72,6 +72,6 @@ class SearchFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance() = SearchFragment()
+        fun newInstance() = SearchFragment2()
     }
 }

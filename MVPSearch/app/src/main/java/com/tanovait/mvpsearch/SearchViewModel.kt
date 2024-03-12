@@ -1,105 +1,75 @@
-package com.example.modernmvpsearch.ui.search
+package com.tanovait.mvpsearch
 
 import androidx.lifecycle.*
 
-import com.example.modernmvpsearch.ui.search.adapter.Result
-import com.example.modernmvpsearch.ui.search.controller.SearchController
+import com.tanovait.mvpsearch.controller.SearchController
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.tanovait.mvpsearch.adapter.SearchResult
+import com.tanovait.mvpsearch.mvp.SearchViewPresenter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.logging.Logger
 
 class SearchViewModel : ViewModel() {
 
-    val searchResults = MutableLiveData<List<Result>>()
     val searchInVisibleMapAreaFlow: MutableStateFlow<String?> = MutableStateFlow(null)
     private val searchController: SearchController = SearchController()
-    val backButtonVisibility: LiveData<Boolean>
-        get() = _backButtonVisibility
-    private val _backButtonVisibility = MutableLiveData(false)
+    private val searchStateHolder = SearchStateHolder(this)
+    private val logger = Logger.getLogger(SearchViewModel::class.java.name)
 
-    // Clears text when we need to reinitialize search
-    val updateQueryText: LiveData<String?>
-        get() = _updateQueryText.distinctUntilChanged().map { it }
-    private val _updateQueryText = MutableLiveData<String?>()
+    val searchState: LiveData<SearchState>
+        get() = searchStateHolder._searchState.distinctUntilChanged().map { it }
 
-    private var currentSearchState = SearchState.NONE
+
     private var isFilterOn = false
 
-    enum class SearchState {
-        CATEGORY,
-        QUERY,
-        MAP,
-        NONE
+   sealed class SearchState {
+        data class Category( val results: List<SearchResult>) : SearchState()
+       data class Query(val results: List<SearchResult>) : SearchState()
+        data class Map(val results: List<SearchResult>) : SearchState()
+        data object NONE : SearchState()
     }
 
     fun onBackButtonPressed() {
-        reinitializeSearch()
-        _backButtonVisibility.value = false
+        searchStateHolder.onEnterState(SearchState.NONE)
     }
 
     fun onTextChanged(query: String) {
-        updateQueryText(query)
-        if (query.isNotEmpty()) {
-            if(currentSearchState != SearchState.QUERY){
-                clearFilter()
-            }
-            clearSearchInVisibleMapArea()
-            displayBackButton()
-            setSearchState(SearchState.QUERY)
-            searchResults.postValue(searchController.search(query))
-        } else {
-            reinitializeSearch()
+        logger.info("onTextChanged: $query")
+        if(searchStateHolder.getState() is SearchState.Category){
+            return
         }
-    }
-
-    private fun setSearchState(state: SearchState) {
-        currentSearchState = state
+        if (query.isNotEmpty()) {
+            searchStateHolder.onEnterState(SearchState.Query(searchController.search(query)))
+        } else {
+            searchStateHolder.onEnterState(SearchState.NONE)
+        }
     }
 
     fun onCategorySearch() {
-        if(currentSearchState != SearchState.CATEGORY){
-            clearFilter()
-        }
-        reinitializeSearch()
-        setSearchState(SearchState.CATEGORY)
-        _updateQueryText.value = "Category"
-        searchResults.postValue(searchController.categorySearch())
+        searchStateHolder.onEnterState(SearchState.Category(searchController.categorySearch()))
     }
 
     fun onSearchInVisibleMapArea() {
-        if(currentSearchState != SearchState.MAP){
-            clearFilter()
-        }
-        reinitializeSearch()
-        // We need to clean this flow later!!
-        setSearchState(SearchState.MAP)
-        searchInVisibleMapAreaFlow.value = "Searching...."
-        searchResults.postValue(searchController.searchInVisibleMap())
+        searchStateHolder.onEnterState(SearchState.Map(searchController.searchInVisibleMap()))
     }
 
-
-    private fun displayBackButton() {
-        _backButtonVisibility.value = true
-    }
-
-    // Back button visibility is not part of this reinitialize search
-    // the logic is not to reinitialze everything so the name is misleading
     private fun reinitializeSearch() {
         clearFilter()
-        setSearchState(SearchState.NONE)
         clearSearchInVisibleMapArea()
-        updateQueryText("")
-        clearSearchResults()
-    }
-
-    private fun clearSearchResults() {
-        searchResults.postValue(emptyList())
     }
 
     private fun clearSearchInVisibleMapArea() {
         searchInVisibleMapAreaFlow.value = null
-    }
-
-    private fun updateQueryText(queryText: String?) {
-        _updateQueryText.value = queryText
     }
 
     private fun clearFilter() {
@@ -109,25 +79,80 @@ class SearchViewModel : ViewModel() {
     // Filter results, performing new search
     fun onFilter() {
         isFilterOn = true
-        when (currentSearchState) {
-            SearchState.CATEGORY -> searchResults.postValue(
-                searchController.categorySearch().filter { it.title.endsWith("1") })
-            SearchState.QUERY -> searchResults.postValue(
-                searchController.search("").filter { it.title.endsWith("1") })
-            SearchState.MAP -> searchResults.postValue(
-                searchController.searchInVisibleMap().filter { it.title.endsWith("1") })
+        when (searchStateHolder.getState()) {
+            is SearchState.Category -> {
+                searchStateHolder.onEnterState(SearchState.Category(
+                    searchController.categorySearch().filter { it.title.endsWith("1") })
+                )
+            }
+            is SearchState.Query -> {
+                searchStateHolder.onEnterState(SearchState.Query(
+                    searchController.search("").filter { it.title.endsWith("1") })
+                )
+            }
+           is SearchState.Map -> {
+               searchStateHolder.onEnterState(SearchState.Map(
+                   searchController.searchInVisibleMap().filter { it.title.endsWith("1") }))
+            }
             SearchState.NONE -> Unit
-        }
+            null -> TODO()
+           }
     }
 
     fun onSearchViewClick() {
-        if (currentSearchState == SearchState.CATEGORY) {
+        if (searchStateHolder.getState() is SearchState.Category) {
             reinitializeSearch()
         }
     }
+
+    class SearchStateHolder(val searchViewModel: SearchViewModel) {
+        val _searchState = MutableLiveData<SearchState>(SearchState.NONE)
+        private val logger = Logger.getLogger(SearchStateHolder::class.java.name)
+        fun onEnterState(state: SearchState) {
+            if(_searchState.value != state){
+                searchViewModel.reinitializeSearch()
+            }
+            logger.info("onSearchStateChanged: $state")
+            _searchState.value = state
+
+            if(state is SearchState.Map){
+                searchViewModel.searchInVisibleMapAreaFlow.value = "Searching...."
+            }
+        }
+        fun getState() = _searchState.value
+    }
 }
+
+fun main() =
+    runBlocking<Unit> {
+      //  val scope = CoroutineScope(Dispatchers.Main)
+        val flow = flow<String> {
+            while (isActive){
+                emit("active....")
+                //delay(1000)
+            }
+        }
+println("----------- here ---------")
+        val job = flow.onEach {
+            print(it)
+        }.launchIn(this)
+        delay(5000)
+        job.cancel()
+        this.cancel()
+    }
+
+
 // We need to clean both state and UI
 // We see that the view model has a lot of UI related logic, can we extract it?
 // back button visibility, clear text, filter selection
 // View model logic depends on search state - category, visible map or other.
 // each operation behavior depends on search state
+
+// TEST
+// enter text -> Result 1, Result 2, back button visible
+// clear text -> empty list, back button hidden
+// Back button -> empty list, back button hidden
+// press category -> Category 1, Category 2, back button visible
+// press filter -> Category 1, back button visible
+// click search view -> empty list, back button hidden
+// search in visible map -> Map 1, Map 2, back button visible, text preserved

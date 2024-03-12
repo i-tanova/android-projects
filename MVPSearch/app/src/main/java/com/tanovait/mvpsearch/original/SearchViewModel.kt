@@ -1,14 +1,14 @@
-package com.tanovait.mvpsearch
+package com.tanovait.mvpsearch.original
 
 import androidx.lifecycle.*
 
 import com.tanovait.mvpsearch.controller.SearchController
 import kotlinx.coroutines.flow.MutableStateFlow
-import com.tanovait.mvpsearch.adapter.Result
+import com.tanovait.mvpsearch.adapter.SearchResult
 
-class SearchViewModel : ViewModel() {
+class SearchViewModel2 : ViewModel() {
 
-    val searchResults = MutableLiveData<List<Result>>()
+    val searchResults = MutableLiveData<List<SearchResult>>()
     val searchInVisibleMapAreaFlow: MutableStateFlow<String?> = MutableStateFlow(null)
     private val searchController: SearchController = SearchController()
     val backButtonVisibility: LiveData<Boolean>
