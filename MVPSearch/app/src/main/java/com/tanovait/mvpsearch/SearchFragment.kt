@@ -2,6 +2,7 @@ package com.tanovait.mvpsearch
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import com.tanovait.mvpsearch.adapter.SearchResult
 import com.tanovait.mvpsearch.databinding.FragmentSearchBinding
 import com.tanovait.mvpsearch.mvp.SearchView
 import com.tanovait.mvpsearch.mvp.SearchViewPresenter
+import java.util.logging.Logger
 
 class SearchFragment : Fragment(), SearchView{
 
@@ -23,10 +25,12 @@ class SearchFragment : Fragment(), SearchView{
     private lateinit var viewModel: SearchViewModel
     private lateinit var adapter: ResultAdapter
     private lateinit var binding: FragmentSearchBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.v("SearchFragment", "onCreateView()")
         adapter = ResultAdapter()
         binding = FragmentSearchBinding.inflate(inflater).apply {
             recyclerView.adapter = adapter
@@ -97,6 +101,11 @@ class SearchFragment : Fragment(), SearchView{
 
     override fun displayError(error: String) {
         // TODO
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.v("SearchFragment", "onDestroy")
     }
 
     override fun onBackButtonVisibilityChanged(isVisible: Boolean) {

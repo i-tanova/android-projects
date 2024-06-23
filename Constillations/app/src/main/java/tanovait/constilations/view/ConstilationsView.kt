@@ -21,13 +21,13 @@ class ConstellationsView@JvmOverloads constructor(
         typeface = Typeface.create( "", Typeface.BOLD)
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
-        paint.color =  Color.GRAY
-        canvas?.drawCircle((width / 2).toFloat(), (height / 2).toFloat(), radius, paint)
-        //constellationPaint.color = Color.RED
-        //canvas?.drawOval(20f, 20f, 20f,20f, constellationPaint);
-    }
+//    override fun onDraw(canvas: Canvas?) {
+//        super.onDraw(canvas)
+//        paint.color =  Color.GRAY
+//        canvas?.drawCircle((width / 2).toFloat(), (height / 2).toFloat(), radius, paint)
+//        //constellationPaint.color = Color.RED
+//        //canvas?.drawOval(20f, 20f, 20f,20f, constellationPaint);
+//    }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         radius = (min(width, height) / 2.0 * 0.8).toFloat()

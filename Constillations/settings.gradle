@@ -1,10 +1,23 @@
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+pluginManagement {
     repositories {
+        gradlePluginPortal()
         google()
         mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
     }
+//    resolutionStrategy {
+//        eachPlugin {
+//            if (requested.id.id == "com.android.application") {
+//                useModule("com.android.tools.build:gradle:7.0.0")
+//            }
+//            if (requested.id.id == "com.android.library") {
+//                useModule("com.android.tools.build:gradle:7.0.0")
+//            }
+//            if (requested.id.id == "org.jetbrains.kotlin.android") {
+//                useModule("org.jetbrains.kotlin:kotlin-gradle:1.9.0")
+//            }
+//        }
+//    }
 }
+
 rootProject.name = "Constilations"
 include ':app'
