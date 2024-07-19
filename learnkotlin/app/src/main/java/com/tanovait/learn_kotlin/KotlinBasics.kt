@@ -27,7 +27,7 @@ fun expressionBody() = {
 }
 
 /**
- *  If is expression(has value) not a statement
+ *  If is expression(returns value) not a statement
  */
 fun ifIsExpression() = {
     println("Hi")
