@@ -4,19 +4,15 @@ pluginManagement {
         google()
         mavenCentral()
     }
-//    resolutionStrategy {
-//        eachPlugin {
-//            if (requested.id.id == "com.android.application") {
-//                useModule("com.android.tools.build:gradle:7.0.0")
-//            }
-//            if (requested.id.id == "com.android.library") {
-//                useModule("com.android.tools.build:gradle:7.0.0")
-//            }
-//            if (requested.id.id == "org.jetbrains.kotlin.android") {
-//                useModule("org.jetbrains.kotlin:kotlin-gradle:1.9.0")
-//            }
-//        }
-//    }
+}
+
+// adding version catalog for androidx-core
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library('androidx-core', 'androidx.core:core-ktx:1.13.1')
+        }
+    }
 }
 
 rootProject.name = "Constilations"
