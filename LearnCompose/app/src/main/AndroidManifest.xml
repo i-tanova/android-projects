@@ -13,6 +13,11 @@
         android:theme="@style/Theme.ComposableSamples"
         tools:targetApi="31">
         <activity
+            android:name=".ComposeAcitvity"
+            android:exported="false"
+            android:label="@string/title_activity_compose_acitvity"
+            android:theme="@style/Theme.ComposableSamples" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"

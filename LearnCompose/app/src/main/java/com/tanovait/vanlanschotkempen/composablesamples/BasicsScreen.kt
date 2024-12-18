@@ -15,7 +15,7 @@ import com.tanovait.vanlanschotkempen.composablesamples.ui.theme.ComposableSampl
 
 @Composable
 fun BasicsScreen() {
-   TestCard()
+    TestCard()
 }
 
 @Composable
@@ -33,7 +33,7 @@ fun TestCard() {
         }
 
         // Box on top of each other (stack elements)
-        Box(modifier = Modifier){
+        Box(modifier = Modifier) {
             Text(text = "Box 1")
             Text(text = "Box 2", color = Color.Red)
         }
