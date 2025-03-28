@@ -5,7 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
+const val TAG = "MessageViewModel"
+
 class MessageViewModel : ViewModel() {
+
+    companion object {
+        const val TAG = "MessageViewModel"
+    }
 
     var complexState by mutableStateOf(MessageMutable("Author", "Body"))
 

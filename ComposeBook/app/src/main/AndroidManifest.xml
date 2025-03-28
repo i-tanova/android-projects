@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -10,28 +12,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ComposableSamples"
+        android:theme="@style/Theme.ComposeBook"
         tools:targetApi="31">
-        <activity
-            android:name="com.tanovait.vanlanschotkempen.officalAndroidTraining.baselayout.BaseLayoutActivity"
-            android:exported="false"
-            android:label="@string/title_activity_main"
-            android:theme="@style/Theme.ComposableSamples" />
-        <activity
-            android:name="com.tanovait.vanlanschotkempen.officalAndroidTraining.OfficalTrainingActivity"
-            android:exported="false"
-            android:label="@string/title_activity_offical_training"
-            android:theme="@style/Theme.ComposableSamples" />
-        <activity
-            android:name=".ComposeAcitvity"
-            android:exported="false"
-            android:label="@string/title_activity_compose_acitvity"
-            android:theme="@style/Theme.ComposableSamples" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.ComposableSamples">
+            android:theme="@style/Theme.ComposeBook">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
