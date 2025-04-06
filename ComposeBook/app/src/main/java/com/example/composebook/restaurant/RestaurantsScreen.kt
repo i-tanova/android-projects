@@ -1,4 +1,4 @@
-package com.example.composebook
+package com.example.composebook.restaurant
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -34,8 +34,6 @@ fun RestaurantsScreen() {
     val viewModel: RestaurantsViewModel = viewModel()
     val restaurants by viewModel.restaurants.collectAsState()
 
-    viewModel.getRestaurants()
-
     LazyColumn(contentPadding = PaddingValues(vertical = 8.dp, horizontal = 8.dp)) {
         items(restaurants.size) { index ->
             RestaurantItem(restaurants[index],
@@ -49,7 +47,7 @@ fun RestaurantItem(restaurant: Restaurant, onSelected: () -> Unit) {
     Card(modifier = Modifier.padding(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
             RestaurantIcon(Icons.Filled.Place, Modifier.weight(0.15f))
-            RestaurantDetails(restaurant.name, restaurant.description, Modifier.weight(0.7f))
+            RestaurantDetails(Modifier.weight(0.7f), restaurant.name, restaurant.description)
             FavoriteIcon(Modifier.weight(0.15f), restaurant.isFavourite, onSelected = onSelected)
         }
     }
@@ -69,14 +67,18 @@ fun FavoriteIcon(modifier: Modifier, isSelected: Boolean, onSelected: () -> Unit
 }
 
 @Composable
-fun RestaurantDetails(title: String, description: String, modifier: Modifier) {
-    Column(modifier = modifier) {
+fun RestaurantDetails(
+    modifier: Modifier,
+    title: String,
+    description: String,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+) {
+    Column(modifier = modifier, horizontalAlignment = horizontalAlignment) {
         Text(text = title, style = MaterialTheme.typography.headlineMedium)
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.primary) {
             Text(text = description, style = MaterialTheme.typography.bodyMedium)
         }
     }
-
 }
 
 @Composable
