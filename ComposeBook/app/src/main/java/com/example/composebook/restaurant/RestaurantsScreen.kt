@@ -29,7 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composebook.data.Restaurant
 
 @Composable
-fun RestaurantsScreen() {
+fun RestaurantsScreen(onItemClick: (id: Int) -> Unit = {}) {
 
     val viewModel: RestaurantsViewModel = viewModel()
     val restaurants by viewModel.restaurants.collectAsState()
@@ -37,18 +37,29 @@ fun RestaurantsScreen() {
     LazyColumn(contentPadding = PaddingValues(vertical = 8.dp, horizontal = 8.dp)) {
         items(restaurants.size) { index ->
             RestaurantItem(restaurants[index],
-                onSelected = { viewModel.toggleFavorite(restaurants[index]) })
+                onItemClick = onItemClick,
+                onFavoriteSelected = { viewModel.toggleFavorite(restaurants[index]) })
         }
     }
 }
 
 @Composable
-fun RestaurantItem(restaurant: Restaurant, onSelected: () -> Unit) {
-    Card(modifier = Modifier.padding(8.dp)) {
+fun RestaurantItem(
+    restaurant: Restaurant,
+    onFavoriteSelected: () -> Unit,
+    onItemClick: (id: Int) -> Unit = {}
+) {
+    Card(modifier = Modifier
+        .padding(8.dp)
+        .clickable { onItemClick(restaurant.id) }) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
             RestaurantIcon(Icons.Filled.Place, Modifier.weight(0.15f))
             RestaurantDetails(Modifier.weight(0.7f), restaurant.name, restaurant.description)
-            FavoriteIcon(Modifier.weight(0.15f), restaurant.isFavourite, onSelected = onSelected)
+            FavoriteIcon(
+                Modifier.weight(0.15f),
+                restaurant.isFavourite,
+                onSelected = onFavoriteSelected
+            )
         }
     }
 }

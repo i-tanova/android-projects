@@ -17,8 +17,7 @@ import com.example.composebook.restaurant.RestaurantDetails
 import com.example.composebook.restaurant.RestaurantIcon
 
 @Composable
-fun RestaurantDetailsScreen(
-) {
+fun RestaurantDetailsScreen(){
    val viewModel: RestaurantDetailsViewModel = viewModel()
     val item = viewModel.restaurantDetails.value
     if(item != null){
