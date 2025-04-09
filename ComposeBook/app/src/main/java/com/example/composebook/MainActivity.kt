@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.composebook.restaurant.RestaurantsScreen
 import com.example.composebook.restaurantdetails.RestaurantDetailsScreen
 import com.example.composebook.ui.theme.ComposeBookTheme
@@ -46,7 +47,8 @@ private fun RestaurantsApp() {
             arguments = listOf(navArgument("restaurant_id") {
                 type = NavType.IntType
                 defaultValue = 0
-            })
+            }),
+            deepLinks = listOf(navDeepLink { uriPattern = "myapp://restaurant/{restaurant_id}" }),
         ) { navStackEntry ->
             val id = navStackEntry.arguments?.getInt("restaurant_id") ?: "0"
             RestaurantDetailsScreen()
