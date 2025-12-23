@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -59,14 +60,14 @@ fun BreathScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Spiral Animation
+            // Circle Animation
             Box(
                 modifier = Modifier
                     .size(300.dp)
                     .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
-                SpiralVisualization(scale = viewModel.getSpiralScale())
+                CircleVisualization(scale = viewModel.getSpiralScale())
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -183,27 +184,21 @@ fun BreathScreen(
 }
 
 @Composable
-fun SpiralVisualization(scale: Float) {
+fun CircleVisualization(scale: Float) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val centerX = size.width / 2
-        val centerY = size.height / 2
-        val gradient = Brush.linearGradient(
-            colors = listOf(Color(0xFF3B82F6), Color(0xFF8B5CF6))
+        val maxRadius = size.minDimension / 2
+        val currentRadius = maxRadius * scale
+
+        val gradient = Brush.radialGradient(
+            colors = listOf(Color(0xFF8B5CF6), Color(0xFF3B82F6), Color.Transparent),
+            center = center,
+            radius = currentRadius
         )
 
-        for (i in 0 until 12) {
-            val angle = (i * 30 * PI / 180).toFloat()
-            val radius = (40 + i * 5) * scale
-            val x = centerX + radius * cos(angle)
-            val y = centerY + radius * sin(angle)
-            val circleRadius = (8 - i * 0.3f) * scale
-
-            drawCircle(
-                brush = gradient,
-                radius = circleRadius,
-                center = androidx.compose.ui.geometry.Offset(x, y),
-                alpha = 0.7f
-            )
-        }
+        drawCircle(
+            brush = gradient,
+            radius = currentRadius,
+            center = center
+        )
     }
 }
