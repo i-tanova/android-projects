@@ -77,6 +77,54 @@ fun BreathScreen(
                 style = MaterialTheme.typography.headlineMedium
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Cycle Counter
+            Card(
+                modifier = Modifier.padding(horizontal = 32.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Current",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "${viewModel.currentCycle}",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
+                    Divider(
+                        modifier = Modifier
+                            .height(48.dp)
+                            .width(1.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f)
+                    )
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Remaining",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "${viewModel.targetCycles - viewModel.completedCycles}",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Timer

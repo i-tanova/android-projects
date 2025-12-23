@@ -56,6 +56,14 @@ fun SettingsScreen(
                 value = viewModel.hold2Duration,
                 onValueChange = { viewModel.hold2Duration = it }
             )
+
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+            CyclesSetting(
+                label = "Total Cycles",
+                value = viewModel.targetCycles,
+                onValueChange = { viewModel.targetCycles = it }
+            )
         }
     }
 }
@@ -77,6 +85,33 @@ fun SettingSlider(
             onValueChange = { onValueChange(it.toInt()) },
             valueRange = 2f..10f,
             steps = 7
+        )
+    }
+}
+
+@Composable
+fun CyclesSetting(
+    label: String,
+    value: Int,
+    onValueChange: (Int) -> Unit
+) {
+    Column {
+        Text(
+            text = "$label ($value cycles)",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Slider(
+            value = value.toFloat(),
+            onValueChange = { onValueChange(it.toInt()) },
+            valueRange = 5f..30f,
+            steps = 24
+        )
+        Text(
+            text = "Choose between 5 and 30 cycles per session",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }

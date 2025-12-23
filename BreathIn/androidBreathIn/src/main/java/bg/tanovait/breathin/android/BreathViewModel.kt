@@ -14,6 +14,10 @@ class BreathViewModel {
     var exhaleDuration by mutableStateOf(4)
     var hold2Duration by mutableStateOf(4)
 
+    var targetCycles by mutableStateOf(15)
+    var currentCycle by mutableStateOf(1)
+    var completedCycles by mutableStateOf(0)
+
     var completedDates by mutableStateOf(setOf<String>())
 
     fun togglePlay() {
@@ -29,6 +33,8 @@ class BreathViewModel {
         phase = BreathPhase.Inhale
         progress = 0f
         sessionStarted = false
+        currentCycle = 1
+        completedCycles = 0
     }
 
     fun updateProgress(deltaTime: Long) {
@@ -45,12 +51,25 @@ class BreathViewModel {
 
         if (progress >= 1f) {
             progress = 0f
-            phase = when (phase) {
+            val nextPhase = when (phase) {
                 BreathPhase.Inhale -> BreathPhase.Hold1
                 BreathPhase.Hold1 -> BreathPhase.Exhale
                 BreathPhase.Exhale -> BreathPhase.Hold2
-                BreathPhase.Hold2 -> BreathPhase.Inhale
+                BreathPhase.Hold2 -> {
+                    // Completed one full cycle
+                    completedCycles++
+                    currentCycle++
+
+                    // Check if we've completed all cycles
+                    if (completedCycles >= targetCycles) {
+                        isPlaying = false
+                        return
+                    }
+
+                    BreathPhase.Inhale
+                }
             }
+            phase = nextPhase
         }
     }
 
